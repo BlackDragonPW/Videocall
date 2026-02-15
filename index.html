@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simple Video Chat</title>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <style>
+    <title>Mobile Video Chat - GitHub Pages</title>
+    <style> 
         * {
             margin: 0;
             padding: 0;
@@ -13,108 +12,89 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0B141A;
-            color: white;
-            height: 100vh;
-            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
         }
 
-        /* Join Screen */
-        .join-screen {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #075E54, #128C7E);
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        .join-box {
-            background: #202C33;
+        .card {
+            background: white;
             border-radius: 20px;
-            padding: 30px 20px;
-            width: 100%;
-            max-width: 350px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
 
-        .join-box h2 {
+        h1 {
+            color: #333;
             text-align: center;
-            margin-bottom: 25px;
-            color: #25D366;
+            margin-bottom: 20px;
+            font-size: 24px;
         }
 
-        .join-box input {
-            width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
-            border: none;
-            border-radius: 10px;
-            background: #2A3942;
-            color: white;
-            font-size: 16px;
-        }
-
-        .join-box input::placeholder {
-            color: #8696A0;
-        }
-
-        .join-box button {
-            width: 100%;
-            padding: 15px;
+        h2 {
+            color: #666;
+            font-size: 18px;
             margin-bottom: 10px;
-            border: none;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
             border-radius: 10px;
-            background: #25D366;
-            color: white;
             font-size: 16px;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        input:focus {
+            border-color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
             font-weight: bold;
             cursor: pointer;
+            transition: all 0.3s;
         }
 
-        .join-box button:last-child {
-            background: #128C7E;
+        button:hover {
+            background: #5a67d8;
         }
 
-        .join-box button:active {
-            transform: scale(0.98);
+        button.secondary {
+            background: #48bb78;
         }
 
-        .room-info {
-            margin-top: 20px;
-            padding: 15px;
-            background: #2A3942;
-            border-radius: 10px;
-            display: none;
+        button.danger {
+            background: #f56565;
         }
 
-        .room-info.active {
-            display: block;
+        button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
         }
 
-        .room-link {
-            background: #0B141A;
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            word-break: break-all;
-            margin: 10px 0;
-        }
-
-        /* Call Screen */
-        .call-screen {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background: #0B141A;
-        }
-
-        .videos {
-            flex: 1;
+        .video-container {
             position: relative;
-            background: #000;
+            background: #1a202c;
+            border-radius: 15px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+            margin-bottom: 15px;
         }
 
         #remoteVideo {
@@ -125,149 +105,217 @@
 
         #localVideo {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 100px;
-            height: 150px;
+            bottom: 15px;
+            right: 15px;
+            width: 120px;
+            height: 160px;
             object-fit: cover;
             border-radius: 10px;
-            border: 2px solid #25D366;
+            border: 3px solid white;
             background: #333;
+            z-index: 10;
         }
 
         .controls {
             display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
             justify-content: center;
-            gap: 20px;
-            padding: 20px;
-            background: #202C33;
         }
 
         .control-btn {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             border: none;
-            background: #2A3942;
+            background: #4a5568;
             color: white;
-            font-size: 20px;
+            font-size: 24px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .control-btn.red {
-            background: #f44336;
+        .control-btn.active {
+            background: #48bb78;
         }
 
-        .control-btn.green {
-            background: #25D366;
+        .control-btn.danger {
+            background: #f56565;
         }
 
-        .chat-area {
-            height: 200px;
-            background: #202C33;
+        .chat-container {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            height: 250px;
             display: flex;
             flex-direction: column;
         }
 
-        .messages {
+        .chat-messages {
             flex: 1;
             overflow-y: auto;
             padding: 10px;
+            background: #f7fafc;
+            border-radius: 10px;
+            margin-bottom: 10px;
         }
 
         .message {
             margin-bottom: 8px;
             padding: 8px 12px;
-            background: #2A3942;
-            border-radius: 10px;
-            max-width: 80%;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             font-size: 14px;
         }
 
-        .message.outgoing {
-            background: #005C4B;
-            margin-left: auto;
+        .message.system {
+            background: #e2e8f0;
+            color: #4a5568;
+            font-style: italic;
+            text-align: center;
         }
 
-        .message.system {
-            background: #374248;
-            text-align: center;
-            font-style: italic;
-            margin: 5px auto;
+        .message .sender {
+            font-weight: bold;
+            color: #667eea;
+            margin-right: 5px;
         }
 
         .chat-input {
             display: flex;
-            padding: 10px;
             gap: 10px;
-            background: #2A3942;
         }
 
         .chat-input input {
             flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 20px;
-            background: #202C33;
-            color: white;
+            margin-bottom: 0;
         }
 
         .chat-input button {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 20px;
-            background: #25D366;
-            color: white;
-            font-weight: bold;
+            width: auto;
+            margin-bottom: 0;
         }
 
         .status {
             text-align: center;
-            padding: 10px;
-            background: #202C33;
-            color: #8696A0;
+            color: #4a5568;
+            margin: 10px 0;
             font-size: 14px;
         }
+
+        .peer-id {
+            background: #edf2f7;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            word-break: break-all;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .qr-code img {
+            width: 200px;
+            height: 200px;
+            border: 2px solid white;
+            border-radius: 10px;
+        }
+
+        .share-link {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .share-link input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 480px) {
+            #localVideo {
+                width: 80px;
+                height: 106px;
+            }
+        }
     </style>
+    <!-- Include PeerJS library -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- Include QR Code library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
 </head>
 <body>
-    <!-- Join Screen -->
-    <div id="joinScreen" class="join-screen">
-        <div class="join-box">
-            <h2>📱 Simple Video Chat</h2>
-            <input type="text" id="nameInput" placeholder="Your Name" value="User">
-            <input type="text" id="roomInput" placeholder="Room Name" value="test123">
-            <button id="createBtn">Create Room</button>
-            <button id="joinBtn">Join Room</button>
+    <div class="container">
+        <!-- Join/Create Room Card -->
+        <div class="card" id="setupCard">
+            <h1>📱 Mobile Video Chat</h1>
+            <h2>Your Name</h2>
+            <input type="text" id="userName" placeholder="Enter your name" value="Friend" maxlength="20">
             
-            <div id="roomInfo" class="room-info">
-                <p>Share this link:</p>
-                <div id="roomLink" class="room-link"></div>
-                <button id="copyBtn">Copy Link</button>
+            <h2>Room Name</h2>
+            <input type="text" id="roomName" placeholder="Enter room name" value="party">
+            
+            <button id="createRoomBtn" class="secondary">Create New Room</button>
+            <button id="joinRoomBtn">Join Existing Room</button>
+            
+            <div class="status" id="connectionStatus">Ready to connect</div>
+        </div>
+
+        <!-- Room Info Card (shown after creation) -->
+        <div class="card" id="roomCard" style="display: none;">
+            <h2>🎉 Room Created!</h2>
+            <p>Share this link with friends:</p>
+            <div class="share-link">
+                <input type="text" id="shareLink" readonly>
+                <button id="copyLinkBtn">📋 Copy</button>
             </div>
-        </div>
-    </div>
-
-    <!-- Call Screen -->
-    <div id="callScreen" class="call-screen" style="display: none;">
-        <div class="status" id="statusText">Connecting...</div>
-        
-        <div class="videos">
-            <video id="remoteVideo" autoplay playsinline></video>
-            <video id="localVideo" autoplay muted playsinline></video>
-        </div>
-
-        <div class="controls">
-            <button class="control-btn" id="muteBtn">🎤</button>
-            <button class="control-btn" id="videoBtn">📹</button>
-            <button class="control-btn red" id="endCallBtn">📞</button>
+            
+            <div class="qr-code">
+                <div id="qrCode"></div>
+            </div>
+            
+            <p>Or share this Room ID:</p>
+            <div class="peer-id" id="roomIdDisplay"></div>
+            
+            <button id="gotoCallBtn" class="secondary">Start Call →</button>
         </div>
 
-        <div class="chat-area">
-            <div class="messages" id="messages"></div>
-            <div class="chat-input">
-                <input type="text" id="chatInput" placeholder="Type a message...">
-                <button id="sendBtn">Send</button>
+        <!-- Call Screen -->
+        <div id="callScreen" style="display: none;">
+            <div class="card">
+                <div class="video-container">
+                    <video id="remoteVideo" autoplay playsinline></video>
+                    <video id="localVideo" autoplay muted playsinline></video>
+                </div>
+
+                <div class="controls">
+                    <button id="audioBtn" class="control-btn" disabled>🎤</button>
+                    <button id="videoBtn" class="control-btn" disabled>📹</button>
+                    <button id="chatToggleBtn" class="control-btn">💬</button>
+                    <button id="leaveBtn" class="control-btn danger">📞</button>
+                </div>
+
+                <div class="status" id="callStatus">Connecting...</div>
+            </div>
+
+            <!-- Chat Container -->
+            <div class="card" id="chatCard">
+                <h2>Chat</h2>
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages"></div>
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" placeholder="Type a message...">
+                        <button id="sendBtn">Send</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -276,7 +324,8 @@
         // Configuration
         const config = {
             iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' }
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
             ]
         };
 
@@ -284,271 +333,367 @@
         let peer = null;
         let currentCall = null;
         let localStream = null;
-        let conn = null;
-        let userName = 'User';
-        let roomId = 'test123';
-        let isMuted = false;
-        let isVideoOff = false;
+        let remoteStream = null;
+        let dataConn = null;
+        let userName = 'Friend';
+        let roomId = null;
+        let isAudioEnabled = true;
+        let isVideoEnabled = true;
+        let remoteUserName = 'Friend';
 
-        // DOM elements
-        const joinScreen = document.getElementById('joinScreen');
+        // DOM Elements
+        const setupCard = document.getElementById('setupCard');
+        const roomCard = document.getElementById('roomCard');
         const callScreen = document.getElementById('callScreen');
-        const nameInput = document.getElementById('nameInput');
-        const roomInput = document.getElementById('roomInput');
-        const createBtn = document.getElementById('createBtn');
-        const joinBtn = document.getElementById('joinBtn');
-        const roomInfo = document.getElementById('roomInfo');
-        const roomLink = document.getElementById('roomLink');
-        const copyBtn = document.getElementById('copyBtn');
-        const statusText = document.getElementById('statusText');
+        const userNameInput = document.getElementById('userName');
+        const roomNameInput = document.getElementById('roomName');
+        const createRoomBtn = document.getElementById('createRoomBtn');
+        const joinRoomBtn = document.getElementById('joinRoomBtn');
+        const gotoCallBtn = document.getElementById('gotoCallBtn');
+        const copyLinkBtn = document.getElementById('copyLinkBtn');
+        const shareLink = document.getElementById('shareLink');
+        const roomIdDisplay = document.getElementById('roomIdDisplay');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const callStatus = document.getElementById('callStatus');
+        
+        // Video elements
         const localVideo = document.getElementById('localVideo');
         const remoteVideo = document.getElementById('remoteVideo');
-        const muteBtn = document.getElementById('muteBtn');
+        
+        // Control buttons
+        const audioBtn = document.getElementById('audioBtn');
         const videoBtn = document.getElementById('videoBtn');
-        const endCallBtn = document.getElementById('endCallBtn');
-        const messages = document.getElementById('messages');
+        const chatToggleBtn = document.getElementById('chatToggleBtn');
+        const leaveBtn = document.getElementById('leaveBtn');
+        
+        // Chat elements
+        const chatMessages = document.getElementById('chatMessages');
         const chatInput = document.getElementById('chatInput');
         const sendBtn = document.getElementById('sendBtn');
 
-        // Initialize Peer
-        function initPeer() {
+        // Initialize PeerJS
+        function initPeer(peerId = null) {
             return new Promise((resolve) => {
-                peer = new Peer({
-                    config: config
-                });
+                if (peerId) {
+                    peer = new Peer(peerId, { config: config });
+                } else {
+                    peer = new Peer({ config: config });
+                }
 
                 peer.on('open', (id) => {
                     console.log('Peer ID:', id);
-                    addMessage('system', 'Connected to server');
-                    resolve();
+                    connectionStatus.textContent = 'Connected to server';
+                    resolve(id);
                 });
 
                 peer.on('error', (error) => {
                     console.error('Peer error:', error);
-                    addMessage('system', 'Error: ' + error.type);
-                });
-
-                peer.on('call', (call) => {
-                    if (confirm('Incoming call. Answer?')) {
-                        if (localStream) {
-                            call.answer(localStream);
-                            setupCall(call);
-                        }
-                    } else {
-                        call.close();
+                    connectionStatus.textContent = 'Error: ' + error.type;
+                    if (error.type === 'unavailable-id') {
+                        alert('Room name already taken. Try a different name.');
                     }
                 });
 
-                peer.on('connection', (connection) => {
-                    setupDataConnection(connection);
+                // Handle incoming calls
+                peer.on('call', (call) => {
+                    callStatus.textContent = 'Incoming call...';
+                    
+                    if (localStream) {
+                        call.answer(localStream);
+                        setupCall(call);
+                    }
+                });
+
+                // Handle connections for chat
+                peer.on('connection', (conn) => {
+                    setupDataConnection(conn);
                 });
             });
         }
 
-        // Get media
-        async function getMedia() {
+        // Initialize media
+        async function initMedia() {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: true, 
+                    video: { 
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'user'
+                    }, 
                     audio: true 
                 });
                 localVideo.srcObject = localStream;
                 return true;
             } catch (error) {
                 console.error('Media error:', error);
-                alert('Please allow camera and microphone access');
+                addChatMessage('system', '❌ Camera/Microphone access denied');
                 return false;
             }
         }
 
-        // Create room
-        createBtn.addEventListener('click', async () => {
-            userName = nameInput.value.trim() || 'User';
-            roomId = roomInput.value.trim() || 'test123';
+        // Create a new room
+        async function createRoom() {
+            userName = userNameInput.value.trim() || 'Friend';
+            roomId = roomNameInput.value.trim().replace(/\s+/g, '-').toLowerCase() || 'party';
             
-            // Initialize Peer
-            await initPeer();
+            connectionStatus.textContent = 'Creating room...';
             
-            // Show room info
+            // Initialize Peer with room ID as peer ID
+            await initPeer(roomId);
+            
+            // Show room card
+            setupCard.style.display = 'none';
+            roomCard.style.display = 'block';
+            
+            // Generate share link
             const shareUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
-            roomLink.textContent = shareUrl;
-            roomInfo.classList.add('active');
+            shareLink.value = shareUrl;
+            roomIdDisplay.textContent = roomId;
             
-            addMessage('system', `Room created: ${roomId}`);
-        });
+            // Generate QR code
+            QRCode.toCanvas(document.createElement('canvas'), shareUrl, { width: 200 }, (error, canvas) => {
+                if (!error) {
+                    document.getElementById('qrCode').innerHTML = '';
+                    document.getElementById('qrCode').appendChild(canvas);
+                }
+            });
+            
+            connectionStatus.textContent = 'Room created! Share the link with friends.';
+        }
 
-        // Join room
-        joinBtn.addEventListener('click', async () => {
-            userName = nameInput.value.trim() || 'User';
+        // Join existing room
+        async function joinRoom() {
+            userName = userNameInput.value.trim() || 'Friend';
             
-            // Check URL for room
+            // Check URL for room parameter
             const urlParams = new URLSearchParams(window.location.search);
-            roomId = urlParams.get('room') || roomInput.value.trim() || 'test123';
+            roomId = urlParams.get('room') || roomNameInput.value.trim() || 'party';
             
-            // Get media first
-            const mediaSuccess = await getMedia();
+            connectionStatus.textContent = 'Joining room...';
+            
+            // Initialize media first
+            const mediaSuccess = await initMedia();
             if (!mediaSuccess) return;
             
-            // Initialize Peer
+            // Initialize Peer (random ID)
             await initPeer();
             
-            // Connect to peer
-            conn = peer.connect(roomId);
-            setupDataConnection(conn);
-            
-            // Make call
-            currentCall = peer.call(roomId, localStream);
-            setupCall(currentCall);
-            
             // Show call screen
-            joinScreen.style.display = 'none';
-            callScreen.style.display = 'flex';
-            statusText.textContent = 'Calling...';
-        });
+            setupCard.style.display = 'none';
+            roomCard.style.display = 'none';
+            callScreen.style.display = 'block';
+            
+            callStatus.textContent = 'Connecting...';
+            
+            // Small delay to ensure peer is ready
+            setTimeout(() => {
+                // Create data connection for chat
+                dataConn = peer.connect(roomId);
+                setupDataConnection(dataConn);
+                
+                // Call the room
+                currentCall = peer.call(roomId, localStream);
+                setupCall(currentCall);
+                
+                enableControls(true);
+            }, 1000);
+        }
 
         // Setup call
         function setupCall(call) {
+            currentCall = call;
+            
             call.on('stream', (remoteStream) => {
                 remoteVideo.srcObject = remoteStream;
-                statusText.textContent = 'Connected';
-                addMessage('system', '✅ Call connected');
+                callStatus.textContent = 'Connected';
+                addChatMessage('system', '✅ Connected to peer');
             });
-
+            
             call.on('close', () => {
-                statusText.textContent = 'Call ended';
+                callStatus.textContent = 'Call ended';
                 remoteVideo.srcObject = null;
             });
-
-            call.on('error', (err) => {
-                console.error('Call error:', err);
-                statusText.textContent = 'Call failed';
+            
+            call.on('error', (error) => {
+                console.error('Call error:', error);
+                callStatus.textContent = 'Call error';
             });
         }
 
-        // Setup data connection
-        function setupDataConnection(connection) {
-            conn = connection;
+        // Setup data connection for chat
+        function setupDataConnection(conn) {
+            dataConn = conn;
             
-            connection.on('open', () => {
+            conn.on('open', () => {
                 console.log('Data connection open');
                 
-                // Send user info
-                connection.send({
-                    type: 'user',
-                    name: userName,
-                    action: 'join'
+                // Send our name
+                conn.send({
+                    type: 'user-info',
+                    name: userName
                 });
             });
-
-            connection.on('data', (data) => {
-                if (data.type === 'user') {
-                    if (data.action === 'join') {
-                        addMessage('system', `👤 ${data.name} joined`);
-                    }
+            
+            conn.on('data', (data) => {
+                if (data.type === 'user-info') {
+                    remoteUserName = data.name;
+                    addChatMessage('system', `👤 ${data.name} joined`);
                 } else if (data.type === 'chat') {
-                    addMessage('incoming', data.message, data.name);
+                    addChatMessage(remoteUserName, data.message);
                 }
             });
-
-            connection.on('close', () => {
-                addMessage('system', '👋 User left');
+            
+            conn.on('close', () => {
+                addChatMessage('system', '👋 User left');
             });
-        }
-
-        // Add message to chat
-        function addMessage(type, text, sender = null) {
-            const msgDiv = document.createElement('div');
-            msgDiv.className = `message ${type}`;
-            
-            if (type === 'incoming' && sender) {
-                msgDiv.innerHTML = `<b>${sender}:</b> ${text}`;
-            } else if (type === 'system') {
-                msgDiv.textContent = text;
-            } else {
-                msgDiv.textContent = text;
-            }
-            
-            messages.appendChild(msgDiv);
-            messages.scrollTop = messages.scrollHeight;
         }
 
         // Send chat message
-        sendBtn.addEventListener('click', () => {
-            const text = chatInput.value.trim();
-            if (text && conn && conn.open) {
-                conn.send({
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message && dataConn && dataConn.open) {
+                dataConn.send({
                     type: 'chat',
-                    message: text,
-                    name: userName
+                    message: message
                 });
-                addMessage('outgoing', text);
+                addChatMessage(userName, message);
                 chatInput.value = '';
+            } else {
+                addChatMessage('system', '❌ Not connected to anyone');
             }
-        });
+        }
 
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendBtn.click();
+        // Add chat message
+        function addChatMessage(sender, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender === 'system' ? 'system' : ''}`;
+            
+            if (sender === 'system') {
+                messageDiv.textContent = message;
+            } else {
+                messageDiv.innerHTML = `<span class="sender">${sender}:</span> ${message}`;
             }
-        });
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
 
-        // Mute audio
-        muteBtn.addEventListener('click', () => {
+        // Enable/disable controls
+        function enableControls(enabled) {
+            audioBtn.disabled = !enabled;
+            videoBtn.disabled = !enabled;
+        }
+
+        // Toggle audio
+        function toggleAudio() {
             if (localStream) {
                 const audioTrack = localStream.getAudioTracks()[0];
                 if (audioTrack) {
-                    isMuted = !isMuted;
-                    audioTrack.enabled = !isMuted;
-                    muteBtn.textContent = isMuted ? '🔇' : '🎤';
+                    isAudioEnabled = !isAudioEnabled;
+                    audioTrack.enabled = isAudioEnabled;
+                    audioBtn.classList.toggle('active', isAudioEnabled);
+                    audioBtn.textContent = isAudioEnabled ? '🎤' : '🔇';
                 }
             }
-        });
+        }
 
         // Toggle video
-        videoBtn.addEventListener('click', () => {
+        function toggleVideo() {
             if (localStream) {
                 const videoTrack = localStream.getVideoTracks()[0];
                 if (videoTrack) {
-                    isVideoOff = !isVideoOff;
-                    videoTrack.enabled = !isVideoOff;
-                    videoBtn.textContent = isVideoOff ? '🚫' : '📹';
+                    isVideoEnabled = !isVideoEnabled;
+                    videoTrack.enabled = isVideoEnabled;
+                    videoBtn.classList.toggle('active', isVideoEnabled);
+                    videoBtn.textContent = isVideoEnabled ? '📹' : '🚫';
                 }
             }
-        });
+        }
 
-        // End call
-        endCallBtn.addEventListener('click', () => {
+        // Leave call
+        function leaveCall() {
             if (currentCall) {
                 currentCall.close();
+                currentCall = null;
             }
-            if (conn) {
-                conn.close();
+            
+            if (dataConn) {
+                dataConn.close();
+                dataConn = null;
             }
+            
             if (localStream) {
-                localStream.getTracks().forEach(t => t.stop());
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+            
+            if (peer) {
+                peer.destroy();
+                peer = null;
             }
             
             callScreen.style.display = 'none';
-            joinScreen.style.display = 'flex';
-            roomInfo.classList.remove('active');
-        });
+            setupCard.style.display = 'block';
+            roomCard.style.display = 'none';
+            
+            remoteVideo.srcObject = null;
+            localVideo.srcObject = null;
+            
+            connectionStatus.textContent = 'Ready to connect';
+        }
 
-        // Copy link
-        copyBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(roomLink.textContent);
-            copyBtn.textContent = 'Copied!';
+        // Copy link to clipboard
+        function copyLink() {
+            shareLink.select();
+            document.execCommand('copy');
+            copyLinkBtn.textContent = '✅ Copied!';
             setTimeout(() => {
-                copyBtn.textContent = 'Copy Link';
+                copyLinkBtn.textContent = '📋 Copy';
             }, 2000);
-        });
+        }
 
-        // Auto-join from URL
+        // Goto call screen
+        async function gotoCall() {
+            const mediaSuccess = await initMedia();
+            if (!mediaSuccess) return;
+            
+            roomCard.style.display = 'none';
+            callScreen.style.display = 'block';
+            enableControls(true);
+            callStatus.textContent = 'Waiting for someone to join...';
+            
+            addChatMessage('system', 'Waiting for someone to join. Share the room link!');
+        }
+
+        // Check URL for room parameter on load
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const roomParam = urlParams.get('room');
+            
             if (roomParam) {
-                roomInput.value = roomParam;
+                roomNameInput.value = roomParam;
             }
+        });
+
+        // Event listeners
+        createRoomBtn.addEventListener('click', createRoom);
+        joinRoomBtn.addEventListener('click', joinRoom);
+        gotoCallBtn.addEventListener('click', gotoCall);
+        copyLinkBtn.addEventListener('click', copyLink);
+        audioBtn.addEventListener('click', toggleAudio);
+        videoBtn.addEventListener('click', toggleVideo);
+        leaveBtn.addEventListener('click', leaveCall);
+        sendBtn.addEventListener('click', sendMessage);
+        
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        chatToggleBtn.addEventListener('click', () => {
+            const chatCard = document.getElementById('chatCard');
+            chatCard.style.display = chatCard.style.display === 'none' ? 'block' : 'none';
         });
     </script>
 </body>
