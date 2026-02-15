@@ -2,99 +2,202 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile Video Chat - GitHub Pages</title>
-    <style> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>WhatsApp Video Chat</title>
+    <!-- Add Emoji Picker -->
+    <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.14.1/index.js" type="module"></script>
+    <!-- Add PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
+        :root {
+            --whatsapp-green: #25D366;
+            --whatsapp-dark: #075E54;
+            --whatsapp-teal: #128C7E;
+            --bg-color: #0B141A;
+            --chat-bg: #0B141A;
+            --message-out: #005C4B;
+            --message-in: #202C33;
+            --text-primary: #E9EDEF;
+            --text-secondary: #8696A0;
+            --icon-color: #8696A0;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 10px;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
+        /* Main Container */
+        #app {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
         }
 
-        .card {
-            background: white;
-            border-radius: 20px;
+        /* Login Screen */
+        .login-screen {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            background: linear-gradient(135deg, var(--whatsapp-dark) 0%, var(--whatsapp-teal) 100%);
         }
 
-        h1 {
-            color: #333;
+        .login-card {
+            background: var(--message-in);
+            border-radius: 30px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .login-card h1 {
             text-align: center;
-            margin-bottom: 20px;
-            font-size: 24px;
+            margin-bottom: 30px;
+            font-size: 28px;
+            color: white;
         }
 
-        h2 {
-            color: #666;
-            font-size: 18px;
-            margin-bottom: 10px;
+        .login-card h1 i {
+            color: var(--whatsapp-green);
+            margin-right: 10px;
         }
 
-        .input-group {
-            margin-bottom: 15px;
-        }
-
-        input, button {
+        .login-input {
             width: 100%;
             padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 25px;
+            background: var(--chat-bg);
+            color: var(--text-primary);
             font-size: 16px;
-            outline: none;
-            margin-bottom: 10px;
         }
 
-        input:focus {
-            border-color: #667eea;
+        .login-input::placeholder {
+            color: var(--text-secondary);
         }
 
-        button {
-            background: #667eea;
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--whatsapp-green);
             color: white;
             border: none;
+            border-radius: 25px;
+            font-size: 18px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
         }
 
-        button:hover {
-            background: #5a67d8;
+        .login-btn:active {
+            transform: scale(0.98);
         }
 
-        button.secondary {
-            background: #48bb78;
+        .qr-section {
+            margin-top: 30px;
+            text-align: center;
         }
 
-        button.danger {
-            background: #f56565;
+        .qr-placeholder {
+            background: white;
+            padding: 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 15px;
         }
 
-        button:disabled {
-            background: #cbd5e0;
-            cursor: not-allowed;
+        #qrCanvas {
+            width: 200px;
+            height: 200px;
+            display: block;
         }
 
+        /* Main Chat Interface */
+        .chat-interface {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: var(--chat-bg);
+            display: none;
+        }
+
+        /* Header */
+        .header {
+            background: var(--message-in);
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(134, 150, 160, 0.2);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--whatsapp-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .call-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .call-info h3 {
+            font-size: 16px;
+            margin-bottom: 3px;
+        }
+
+        .call-status {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .header-right {
+            display: flex;
+            gap: 20px;
+        }
+
+        .header-right i {
+            font-size: 20px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        /* Video Container */
         .video-container {
             position: relative;
-            background: #1a202c;
-            border-radius: 15px;
-            overflow: hidden;
-            aspect-ratio: 16/9;
-            margin-bottom: 15px;
+            background: #000;
+            height: 30vh;
+            min-height: 200px;
         }
 
         #remoteVideo {
@@ -107,216 +210,523 @@
             position: absolute;
             bottom: 15px;
             right: 15px;
-            width: 120px;
-            height: 160px;
+            width: 90px;
+            height: 120px;
             object-fit: cover;
             border-radius: 10px;
-            border: 3px solid white;
+            border: 2px solid var(--whatsapp-green);
             background: #333;
             z-index: 10;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        .controls {
+        #localVideo.expanded {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            border-radius: 0;
+            z-index: 20;
+        }
+
+        .video-controls-overlay {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
             display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
             justify-content: center;
+            gap: 20px;
+            z-index: 30;
         }
 
-        .control-btn {
-            width: 60px;
-            height: 60px;
+        .video-control-btn {
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
             border: none;
-            background: #4a5568;
+            background: rgba(0,0,0,0.6);
             color: white;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s;
+        }
+
+        .video-control-btn.active {
+            background: var(--whatsapp-green);
+        }
+
+        .video-control-btn.danger {
+            background: #f44336;
+        }
+
+        .video-control-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Chat Messages Area */
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: var(--chat-bg);
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 32 32" opacity="0.05"><path fill="%238696A0" d="M16 0C7.2 0 0 7.2 0 16s7.2 16 16 16 16-7.2 16-16S24.8 0 16 0zm0 29c-7.2 0-13-5.8-13-13S8.8 3 16 3s13 5.8 13 13-5.8 13-13 13z"/></svg>');
+        }
+
+        /* Message Bubbles */
+        .message {
+            max-width: 80%;
+            padding: 8px 12px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.4;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.outgoing {
+            align-self: flex-end;
+            background: var(--message-out);
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.incoming {
+            align-self: flex-start;
+            background: var(--message-in);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.system {
+            align-self: center;
+            background: rgba(134, 150, 160, 0.2);
+            color: var(--text-secondary);
+            font-style: italic;
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        .message-sender {
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--whatsapp-green);
+            margin-bottom: 3px;
+        }
+
+        .message-time {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 3px;
+            text-align: right;
+        }
+
+        /* GIF and Media in messages */
+        .message-gif {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+
+        .message-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+
+        /* Input Area */
+        .input-area {
+            background: var(--message-in);
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid rgba(134, 150, 160, 0.2);
+        }
+
+        .input-wrapper {
+            flex: 1;
+            background: var(--chat-bg);
+            border-radius: 25px;
+            padding: 5px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 15px;
+            padding: 8px 0;
+            outline: none;
+            min-height: 40px;
+            max-height: 100px;
+            resize: none;
+        }
+
+        #messageInput::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .attach-btn, .emoji-btn, .send-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 22px;
+            cursor: pointer;
+            padding: 5px;
+            transition: color 0.3s;
+        }
+
+        .send-btn {
+            color: var(--whatsapp-green);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Emoji Picker */
+        .emoji-picker-container {
+            position: absolute;
+            bottom: 80px;
+            right: 15px;
+            z-index: 100;
+            display: none;
+        }
+
+        .emoji-picker-container.active {
+            display: block;
+        }
+
+        emoji-picker {
+            width: 350px;
+            height: 400px;
+            --background: var(--message-in);
+            --text-color: var(--text-primary);
+            --border-color: rgba(134, 150, 160, 0.2);
+        }
+
+        /* GIF Keyboard Support - Native mobile keyboard will handle GIFs */
+        /* But we'll add a GIF button for desktop */
+        .gif-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 22px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* Modal for fullscreen media */
+        .media-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .media-modal.active {
+            display: flex;
+        }
+
+        .media-modal img, .media-modal video {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            background: rgba(0,0,0,0.5);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .control-btn.active {
-            background: #48bb78;
+        /* Room Info Modal */
+        .room-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
         }
 
-        .control-btn.danger {
-            background: #f56565;
+        .room-modal.active {
+            display: flex;
         }
 
-        .chat-container {
-            background: white;
-            border-radius: 15px;
+        .room-modal-content {
+            background: var(--message-in);
+            border-radius: 30px;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .room-modal-content h3 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .room-link {
+            background: var(--chat-bg);
             padding: 15px;
-            height: 250px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-            background: #f7fafc;
             border-radius: 10px;
-            margin-bottom: 10px;
-        }
-
-        .message {
-            margin-bottom: 8px;
-            padding: 8px 12px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            font-size: 14px;
-        }
-
-        .message.system {
-            background: #e2e8f0;
-            color: #4a5568;
-            font-style: italic;
-            text-align: center;
-        }
-
-        .message .sender {
-            font-weight: bold;
-            color: #667eea;
-            margin-right: 5px;
-        }
-
-        .chat-input {
-            display: flex;
-            gap: 10px;
-        }
-
-        .chat-input input {
-            flex: 1;
-            margin-bottom: 0;
-        }
-
-        .chat-input button {
-            width: auto;
-            margin-bottom: 0;
-        }
-
-        .status {
-            text-align: center;
-            color: #4a5568;
-            margin: 10px 0;
-            font-size: 14px;
-        }
-
-        .peer-id {
-            background: #edf2f7;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
             word-break: break-all;
-            font-family: monospace;
-            margin: 10px 0;
+            margin-bottom: 20px;
+            font-size: 14px;
         }
 
-        .qr-code {
-            text-align: center;
-            margin: 20px 0;
+        .copy-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--whatsapp-green);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 15px;
         }
 
-        .qr-code img {
+        #qrModalCanvas {
             width: 200px;
             height: 200px;
-            border: 2px solid white;
+            margin: 0 auto;
+            display: block;
+            background: white;
+            padding: 10px;
             border-radius: 10px;
         }
 
-        .share-link {
+        /* Typing indicator */
+        .typing-indicator {
+            display: none;
+            padding: 10px;
+            background: var(--message-in);
+            border-radius: 18px;
+            width: fit-content;
+            margin-bottom: 5px;
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .typing-dots {
             display: flex;
-            gap: 10px;
-            margin: 10px 0;
+            gap: 4px;
         }
 
-        .share-link input {
-            flex: 1;
-            margin-bottom: 0;
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
         }
 
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.6; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+
+        /* Mobile optimizations */
         @media (max-width: 480px) {
+            .message-gif, .message-image {
+                max-width: 150px;
+                max-height: 150px;
+            }
+            
+            emoji-picker {
+                width: 300px;
+                height: 350px;
+            }
+            
             #localVideo {
-                width: 80px;
-                height: 106px;
+                width: 70px;
+                height: 93px;
             }
         }
     </style>
-    <!-- Include PeerJS library -->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-    <!-- Include QR Code library -->
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <!-- Join/Create Room Card -->
-        <div class="card" id="setupCard">
-            <h1>📱 Mobile Video Chat</h1>
-            <h2>Your Name</h2>
-            <input type="text" id="userName" placeholder="Enter your name" value="Friend" maxlength="20">
-            
-            <h2>Room Name</h2>
-            <input type="text" id="roomName" placeholder="Enter room name" value="party">
-            
-            <button id="createRoomBtn" class="secondary">Create New Room</button>
-            <button id="joinRoomBtn">Join Existing Room</button>
-            
-            <div class="status" id="connectionStatus">Ready to connect</div>
+    <div id="app">
+        <!-- Login Screen -->
+        <div class="login-screen" id="loginScreen">
+            <div class="login-card">
+                <h1>
+                    <i class="fab fa-whatsapp"></i>
+                    Video Chat
+                </h1>
+                
+                <input type="text" class="login-input" id="nameInput" placeholder="Your name" value="User">
+                <input type="text" class="login-input" id="roomInput" placeholder="Room name" value="party">
+                
+                <button class="login-btn" id="createRoomBtn">
+                    <i class="fas fa-plus-circle"></i> Create Room
+                </button>
+                
+                <div style="text-align: center; margin: 15px 0; color: var(--text-secondary);">or</div>
+                
+                <button class="login-btn" id="joinRoomBtn" style="background: var(--whatsapp-teal);">
+                    <i class="fas fa-sign-in-alt"></i> Join Room
+                </button>
+                
+                <div class="qr-section" id="qrSection" style="display: none;">
+                    <div class="qr-placeholder">
+                        <canvas id="qrCanvas"></canvas>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: 14px;">Scan with phone to join</p>
+                </div>
+            </div>
         </div>
 
-        <!-- Room Info Card (shown after creation) -->
-        <div class="card" id="roomCard" style="display: none;">
-            <h2>🎉 Room Created!</h2>
-            <p>Share this link with friends:</p>
-            <div class="share-link">
-                <input type="text" id="shareLink" readonly>
-                <button id="copyLinkBtn">📋 Copy</button>
-            </div>
-            
-            <div class="qr-code">
-                <div id="qrCode"></div>
-            </div>
-            
-            <p>Or share this Room ID:</p>
-            <div class="peer-id" id="roomIdDisplay"></div>
-            
-            <button id="gotoCallBtn" class="secondary">Start Call →</button>
-        </div>
-
-        <!-- Call Screen -->
-        <div id="callScreen" style="display: none;">
-            <div class="card">
-                <div class="video-container">
-                    <video id="remoteVideo" autoplay playsinline></video>
-                    <video id="localVideo" autoplay muted playsinline></video>
-                </div>
-
-                <div class="controls">
-                    <button id="audioBtn" class="control-btn" disabled>🎤</button>
-                    <button id="videoBtn" class="control-btn" disabled>📹</button>
-                    <button id="chatToggleBtn" class="control-btn">💬</button>
-                    <button id="leaveBtn" class="control-btn danger">📞</button>
-                </div>
-
-                <div class="status" id="callStatus">Connecting...</div>
-            </div>
-
-            <!-- Chat Container -->
-            <div class="card" id="chatCard">
-                <h2>Chat</h2>
-                <div class="chat-container">
-                    <div class="chat-messages" id="chatMessages"></div>
-                    <div class="chat-input">
-                        <input type="text" id="chatInput" placeholder="Type a message...">
-                        <button id="sendBtn">Send</button>
+        <!-- Main Chat Interface -->
+        <div class="chat-interface" id="chatInterface">
+            <!-- Header -->
+            <div class="header">
+                <div class="header-left">
+                    <div class="avatar" id="avatar">U</div>
+                    <div class="call-info">
+                        <h3 id="contactName">Select a room</h3>
+                        <span class="call-status" id="callStatus">Tap to start call</span>
                     </div>
                 </div>
+                <div class="header-right">
+                    <i class="fas fa-video" id="toggleVideoBtn" title="Toggle video"></i>
+                    <i class="fas fa-phone-alt" id="audioCallBtn" title="Audio call"></i>
+                    <i class="fas fa-info-circle" id="roomInfoBtn" title="Room info"></i>
+                </div>
             </div>
+
+            <!-- Video Container (Hidden by default) -->
+            <div class="video-container" id="videoContainer" style="display: none;">
+                <video id="remoteVideo" autoplay playsinline></video>
+                <video id="localVideo" autoplay muted playsinline></video>
+                
+                <div class="video-controls-overlay">
+                    <button class="video-control-btn" id="muteBtn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                    <button class="video-control-btn" id="cameraBtn">
+                        <i class="fas fa-video"></i>
+                    </button>
+                    <button class="video-control-btn" id="switchCameraBtn">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="video-control-btn danger" id="endCallBtn">
+                        <i class="fas fa-phone-slash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div class="messages-area" id="messagesArea"></div>
+
+            <!-- Typing Indicator -->
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="input-area">
+                <button class="attach-btn" id="attachBtn">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                
+                <div class="input-wrapper">
+                    <button class="emoji-btn" id="emojiBtn">
+                        <i class="far fa-smile"></i>
+                    </button>
+                    
+                    <textarea id="messageInput" placeholder="Type a message" rows="1"></textarea>
+                    
+                    <button class="gif-btn" id="gifBtn">
+                        <i class="fas fa-gif"></i>
+                    </button>
+                </div>
+                
+                <button class="send-btn" id="sendBtn" disabled>
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+
+            <!-- Hidden file input for attachments -->
+            <input type="file" id="fileInput" accept="image/*,video/*" style="display: none;">
+        </div>
+
+        <!-- Emoji Picker Container -->
+        <div class="emoji-picker-container" id="emojiPicker">
+            <emoji-picker></emoji-picker>
+        </div>
+
+        <!-- Room Info Modal -->
+        <div class="room-modal" id="roomModal">
+            <div class="room-modal-content">
+                <h3>Room Information</h3>
+                <div class="room-link" id="roomLinkDisplay"></div>
+                <button class="copy-btn" id="copyRoomLinkBtn">
+                    <i class="fas fa-copy"></i> Copy Link
+                </button>
+                <canvas id="qrModalCanvas"></canvas>
+                <button class="login-btn" id="closeRoomModal" style="margin-top: 15px; background: var(--text-secondary);">Close</button>
+            </div>
+        </div>
+
+        <!-- Media Modal -->
+        <div class="media-modal" id="mediaModal">
+            <span class="close-modal" id="closeMediaModal">&times;</span>
+            <div id="mediaContent"></div>
         </div>
     </div>
 
@@ -325,7 +735,8 @@
         const config = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' }
             ]
         };
 
@@ -334,352 +745,580 @@
         let currentCall = null;
         let localStream = null;
         let remoteStream = null;
-        let userName = 'Friend';
-        let roomId = null;
+        let dataConnections = [];
+        let userName = 'User';
+        let roomId = 'party';
         let isAudioEnabled = true;
         let isVideoEnabled = true;
+        let isCallActive = false;
+        let typingTimeout = null;
+        let remoteUserName = 'Friend';
 
         // DOM Elements
-        const setupCard = document.getElementById('setupCard');
-        const roomCard = document.getElementById('roomCard');
-        const callScreen = document.getElementById('callScreen');
-        const userNameInput = document.getElementById('userName');
-        const roomNameInput = document.getElementById('roomName');
+        const loginScreen = document.getElementById('loginScreen');
+        const chatInterface = document.getElementById('chatInterface');
+        const nameInput = document.getElementById('nameInput');
+        const roomInput = document.getElementById('roomInput');
         const createRoomBtn = document.getElementById('createRoomBtn');
         const joinRoomBtn = document.getElementById('joinRoomBtn');
-        const gotoCallBtn = document.getElementById('gotoCallBtn');
-        const copyLinkBtn = document.getElementById('copyLinkBtn');
-        const shareLink = document.getElementById('shareLink');
-        const roomIdDisplay = document.getElementById('roomIdDisplay');
-        const connectionStatus = document.getElementById('connectionStatus');
-        const callStatus = document.getElementById('callStatus');
-        
-        // Video elements
         const localVideo = document.getElementById('localVideo');
         const remoteVideo = document.getElementById('remoteVideo');
-        
-        // Control buttons
-        const audioBtn = document.getElementById('audioBtn');
-        const videoBtn = document.getElementById('videoBtn');
-        const chatToggleBtn = document.getElementById('chatToggleBtn');
-        const leaveBtn = document.getElementById('leaveBtn');
-        
-        // Chat elements
-        const chatMessages = document.getElementById('chatMessages');
-        const chatInput = document.getElementById('chatInput');
+        const videoContainer = document.getElementById('videoContainer');
+        const messagesArea = document.getElementById('messagesArea');
+        const messageInput = document.getElementById('messageInput');
         const sendBtn = document.getElementById('sendBtn');
+        const emojiBtn = document.getElementById('emojiBtn');
+        const emojiPicker = document.getElementById('emojiPicker');
+        const attachBtn = document.getElementById('attachBtn');
+        const fileInput = document.getElementById('fileInput');
+        const gifBtn = document.getElementById('gifBtn');
+        const muteBtn = document.getElementById('muteBtn');
+        const cameraBtn = document.getElementById('cameraBtn');
+        const switchCameraBtn = document.getElementById('switchCameraBtn');
+        const endCallBtn = document.getElementById('endCallBtn');
+        const toggleVideoBtn = document.getElementById('toggleVideoBtn');
+        const audioCallBtn = document.getElementById('audioCallBtn');
+        const roomInfoBtn = document.getElementById('roomInfoBtn');
+        const roomModal = document.getElementById('roomModal');
+        const roomLinkDisplay = document.getElementById('roomLinkDisplay');
+        const copyRoomLinkBtn = document.getElementById('copyRoomLinkBtn');
+        const closeRoomModal = document.getElementById('closeRoomModal');
+        const qrModalCanvas = document.getElementById('qrModalCanvas');
+        const contactName = document.getElementById('contactName');
+        const callStatus = document.getElementById('callStatus');
+        const avatar = document.getElementById('avatar');
+        const typingIndicator = document.getElementById('typingIndicator');
+        const mediaModal = document.getElementById('mediaModal');
+        const mediaContent = document.getElementById('mediaContent');
 
-        // Initialize PeerJS
+        // Initialize Peer
         function initPeer() {
             peer = new Peer({
-                // Using PeerJS free cloud server
                 config: config
             });
 
             peer.on('open', (id) => {
                 console.log('Peer ID:', id);
-                connectionStatus.textContent = 'Connected to signaling server';
+                showNotification('Connected to server');
             });
 
             peer.on('error', (error) => {
                 console.error('Peer error:', error);
-                connectionStatus.textContent = 'Error: ' + error.type;
+                showNotification('Connection error: ' + error.type);
             });
 
-            // Handle incoming calls
             peer.on('call', (call) => {
-                callStatus.textContent = 'Incoming call...';
-                
-                // Answer with our video stream
-                if (localStream) {
-                    call.answer(localStream);
-                    handleCall(call);
+                if (confirm('Incoming video call. Answer?')) {
+                    if (localStream) {
+                        call.answer(localStream);
+                        handleCall(call);
+                    } else {
+                        // Start with audio only first
+                        navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+                            .then(stream => {
+                                localStream = stream;
+                                localVideo.srcObject = stream;
+                                call.answer(stream);
+                                handleCall(call);
+                            });
+                    }
+                } else {
+                    call.close();
                 }
             });
 
-            // Handle connections for chat
             peer.on('connection', (conn) => {
                 handleDataConnection(conn);
             });
         }
 
         // Initialize media
-        async function initMedia() {
+        async function initMedia(video = true, audio = true) {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
+                    video: video ? { 
                         width: { ideal: 640 },
                         height: { ideal: 480 },
                         facingMode: 'user'
-                    }, 
-                    audio: true 
+                    } : false, 
+                    audio: audio 
                 });
                 localVideo.srcObject = localStream;
                 return true;
             } catch (error) {
                 console.error('Media error:', error);
-                addChatMessage('system', '❌ Camera/Microphone access denied');
+                addMessage('system', '❌ Camera/Microphone access denied');
                 return false;
             }
         }
 
-        // Create a new room
+        // Create room
         async function createRoom() {
-            userName = userNameInput.value.trim() || 'Friend';
-            roomId = roomNameInput.value.trim() || 'party';
+            userName = nameInput.value.trim() || 'User';
+            roomId = roomInput.value.trim().replace(/\s+/g, '-').toLowerCase() || 'party';
             
-            connectionStatus.textContent = 'Creating room...';
+            if (!peer) initPeer();
             
-            // Initialize Peer if not already done
-            if (!peer) {
-                initPeer();
-                // Wait for peer to be ready
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
+            // Wait for peer to be ready
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
-            // Set room ID as peer ID
-            roomId = roomId.replace(/\s+/g, '-').toLowerCase();
-            
-            // Show room card
-            setupCard.style.display = 'none';
-            roomCard.style.display = 'block';
-            
-            // Generate share link
+            // Show QR code
             const shareUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
-            shareLink.value = shareUrl;
-            roomIdDisplay.textContent = roomId;
-            
-            // Generate QR code
-            QRCode.toCanvas(document.createElement('canvas'), shareUrl, { width: 200 }, (error, canvas) => {
+            QRCode.toCanvas(document.getElementById('qrCanvas'), shareUrl, { width: 200 }, (error) => {
                 if (!error) {
-                    document.getElementById('qrCode').innerHTML = '';
-                    document.getElementById('qrCode').appendChild(canvas);
+                    document.getElementById('qrSection').style.display = 'block';
                 }
             });
             
-            connectionStatus.textContent = 'Room created! Share the link with friends.';
+            // Update UI
+            avatar.textContent = userName.charAt(0).toUpperCase();
+            contactName.textContent = roomId;
+            callStatus.textContent = 'Room created. Share QR or link.';
+            
+            // Show room modal with info
+            roomLinkDisplay.textContent = shareUrl;
+            QRCode.toCanvas(qrModalCanvas, shareUrl, { width: 200 });
+            roomModal.classList.add('active');
         }
 
-        // Join existing room
+        // Join room
         async function joinRoom() {
-            userName = userNameInput.value.trim() || 'Friend';
+            userName = nameInput.value.trim() || 'User';
             
             // Check URL for room parameter
             const urlParams = new URLSearchParams(window.location.search);
-            roomId = urlParams.get('room') || roomNameInput.value.trim() || 'party';
+            roomId = urlParams.get('room') || roomInput.value.trim() || 'party';
             
-            connectionStatus.textContent = 'Joining room...';
-            
-            // Initialize media first
-            const mediaSuccess = await initMedia();
+            // Initialize media (audio only first)
+            const mediaSuccess = await initMedia(false, true);
             if (!mediaSuccess) return;
             
-            // Initialize Peer
-            if (!peer) {
-                initPeer();
-                // Wait for peer to be ready
-                await new Promise(resolve => setTimeout(resolve, 1000));
-            }
+            if (!peer) initPeer();
             
-            // Start call to the room
-            callStatus.textContent = 'Calling...';
+            // Wait for peer to be ready
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Show chat interface
+            loginScreen.style.display = 'none';
+            chatInterface.style.display = 'flex';
+            
+            avatar.textContent = userName.charAt(0).toUpperCase();
+            contactName.textContent = roomId;
+            callStatus.textContent = 'Connecting...';
             
             // Create data connection for chat
             const conn = peer.connect(roomId);
             handleDataConnection(conn);
             
-            // Call the room
+            addMessage('system', `👋 You joined ${roomId}`);
+        }
+
+        // Start video call
+        async function startVideoCall() {
+            if (!localStream || !localStream.getVideoTracks().length) {
+                // Add video to stream
+                try {
+                    const videoStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    if (localStream) {
+                        videoStream.getVideoTracks().forEach(track => {
+                            localStream.addTrack(track);
+                        });
+                    } else {
+                        localStream = videoStream;
+                    }
+                    localVideo.srcObject = localStream;
+                } catch (error) {
+                    console.error('Could not add video:', error);
+                    return;
+                }
+            }
+            
+            videoContainer.style.display = 'block';
+            isCallActive = true;
+            
             const call = peer.call(roomId, localStream);
             handleCall(call);
             
-            // Show call screen
-            setupCard.style.display = 'none';
-            roomCard.style.display = 'none';
-            callScreen.style.display = 'block';
-            
-            enableControls(true);
+            callStatus.textContent = 'Calling...';
         }
 
-        // Handle incoming/outgoing call
+        // Handle call
         function handleCall(call) {
             currentCall = call;
             
             call.on('stream', (remoteStream) => {
                 remoteVideo.srcObject = remoteStream;
+                videoContainer.style.display = 'block';
                 callStatus.textContent = 'Connected';
-                addChatMessage('system', '✅ Connected to peer');
+                addMessage('system', '✅ Video call connected');
             });
             
             call.on('close', () => {
+                videoContainer.style.display = 'none';
                 callStatus.textContent = 'Call ended';
+                isCallActive = false;
                 remoteVideo.srcObject = null;
             });
             
             call.on('error', (error) => {
                 console.error('Call error:', error);
-                callStatus.textContent = 'Call error';
+                callStatus.textContent = 'Call failed';
             });
         }
 
         // Handle data connection for chat
         function handleDataConnection(conn) {
+            dataConnections.push(conn);
+            
             conn.on('open', () => {
                 console.log('Data connection open');
                 
-                // Send our name
+                // Send user info
                 conn.send({
                     type: 'user-info',
-                    name: userName
+                    name: userName,
+                    action: 'join'
                 });
             });
             
             conn.on('data', (data) => {
                 if (data.type === 'user-info') {
-                    // Store remote user name
-                    remoteUserName = data.name;
+                    if (data.action === 'join') {
+                        remoteUserName = data.name;
+                        addMessage('system', `👤 ${data.name} joined`);
+                        contactName.textContent = `${roomId} (${remoteUserName})`;
+                    } else if (data.action === 'typing') {
+                        typingIndicator.classList.toggle('active', data.isTyping);
+                    }
                 } else if (data.type === 'chat') {
-                    addChatMessage(remoteUserName || 'Friend', data.message);
+                    addMessage('incoming', data.message, data.name || remoteUserName);
+                } else if (data.type === 'media') {
+                    displayMediaMessage('incoming', data.url, data.type, data.name || remoteUserName);
                 }
+            });
+            
+            conn.on('close', () => {
+                addMessage('system', '👋 User left');
+                callStatus.textContent = 'Disconnected';
             });
         }
 
-        let remoteUserName = 'Friend';
-
-        // Send chat message
+        // Send message
         function sendMessage() {
-            const message = chatInput.value.trim();
-            if (message && peer) {
-                // Send via data connection
-                const conn = peer.connect(roomId);
-                conn.on('open', () => {
+            const text = messageInput.value.trim();
+            if (!text || !peer) return;
+            
+            // Send via all data connections
+            dataConnections.forEach(conn => {
+                if (conn.open) {
                     conn.send({
                         type: 'chat',
-                        message: message
+                        message: text,
+                        name: userName
                     });
+                }
+            });
+            
+            addMessage('outgoing', text);
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+            sendBtn.disabled = true;
+        }
+
+        // Add message to UI
+        function addMessage(type, content, sender = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            if (type === 'system') {
+                messageDiv.textContent = content;
+            } else {
+                if (sender && type === 'incoming') {
+                    const senderDiv = document.createElement('div');
+                    senderDiv.className = 'message-sender';
+                    senderDiv.textContent = sender;
+                    messageDiv.appendChild(senderDiv);
+                }
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.textContent = content;
+                messageDiv.appendChild(contentDiv);
+                
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'message-time';
+                timeDiv.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                messageDiv.appendChild(timeDiv);
+            }
+            
+            messagesArea.appendChild(messageDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        // Display media message
+        function displayMediaMessage(type, url, mediaType, sender = null) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            if (sender && type === 'incoming') {
+                const senderDiv = document.createElement('div');
+                senderDiv.className = 'message-sender';
+                senderDiv.textContent = sender;
+                messageDiv.appendChild(senderDiv);
+            }
+            
+            if (mediaType.startsWith('image/') || mediaType === 'gif') {
+                const img = document.createElement('img');
+                img.src = url;
+                img.className = 'message-gif';
+                img.onclick = () => showMediaFullscreen(url, mediaType);
+                messageDiv.appendChild(img);
+            } else if (mediaType.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.src = url;
+                video.className = 'message-image';
+                video.controls = true;
+                video.onclick = () => showMediaFullscreen(url, mediaType);
+                messageDiv.appendChild(video);
+            }
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            messageDiv.appendChild(timeDiv);
+            
+            messagesArea.appendChild(messageDiv);
+            messagesArea.scrollTop = messagesArea.scrollHeight;
+        }
+
+        // Handle typing indicator
+        messageInput.addEventListener('input', () => {
+            // Auto-resize
+            messageInput.style.height = 'auto';
+            messageInput.style.height = messageInput.scrollHeight + 'px';
+            
+            // Enable/disable send button
+            sendBtn.disabled = !messageInput.value.trim();
+            
+            // Send typing indicator
+            if (peer) {
+                dataConnections.forEach(conn => {
+                    if (conn.open) {
+                        conn.send({
+                            type: 'user-info',
+                            action: 'typing',
+                            isTyping: messageInput.value.length > 0
+                        });
+                    }
+                });
+            }
+            
+            // Clear typing timeout
+            if (typingTimeout) clearTimeout(typingTimeout);
+            
+            // Set timeout to stop typing indicator
+            typingTimeout = setTimeout(() => {
+                if (peer) {
+                    dataConnections.forEach(conn => {
+                        if (conn.open) {
+                            conn.send({
+                                type: 'user-info',
+                                action: 'typing',
+                                isTyping: false
+                            });
+                        }
+                    });
+                }
+            }, 1000);
+        });
+
+        // Handle emoji selection
+        emojiPicker.addEventListener('emoji-click', event => {
+            messageInput.value += event.detail.unicode;
+            messageInput.dispatchEvent(new Event('input'));
+            emojiPicker.classList.remove('active');
+        });
+
+        emojiBtn.addEventListener('click', () => {
+            emojiPicker.classList.toggle('active');
+        });
+
+        // Handle file attachment
+        attachBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                
+                // Send via data connections
+                dataConnections.forEach(conn => {
+                    if (conn.open) {
+                        conn.send({
+                            type: 'media',
+                            url: url,
+                            fileType: file.type,
+                            name: userName
+                        });
+                    }
                 });
                 
-                addChatMessage(userName, message);
-                chatInput.value = '';
+                displayMediaMessage('outgoing', url, file.type);
             }
-        }
+        });
 
-        // Add chat message
-        function addChatMessage(sender, message) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${sender === 'system' ? 'system' : ''}`;
-            
-            if (sender === 'system') {
-                messageDiv.textContent = message;
-            } else {
-                messageDiv.innerHTML = `<span class="sender">${sender}:</span> ${message}`;
-            }
-            
-            chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
+        // GIF button (uses mobile keyboard GIF support)
+        gifBtn.addEventListener('click', () => {
+            // On mobile, this will open the keyboard with GIF support
+            messageInput.focus();
+            // Show hint
+            addMessage('system', '💡 On mobile, use the GIF button on your keyboard');
+        });
 
-        // Enable/disable controls
-        function enableControls(enabled) {
-            audioBtn.disabled = !enabled;
-            videoBtn.disabled = !enabled;
-        }
-
-        // Toggle audio
-        function toggleAudio() {
+        // Video controls
+        muteBtn.addEventListener('click', () => {
             if (localStream) {
                 const audioTrack = localStream.getAudioTracks()[0];
                 if (audioTrack) {
                     isAudioEnabled = !isAudioEnabled;
                     audioTrack.enabled = isAudioEnabled;
-                    audioBtn.classList.toggle('active', isAudioEnabled);
+                    muteBtn.innerHTML = isAudioEnabled ? '<i class="fas fa-microphone"></i>' : '<i class="fas fa-microphone-slash"></i>';
                 }
             }
-        }
+        });
 
-        // Toggle video
-        function toggleVideo() {
+        cameraBtn.addEventListener('click', () => {
             if (localStream) {
                 const videoTrack = localStream.getVideoTracks()[0];
                 if (videoTrack) {
                     isVideoEnabled = !isVideoEnabled;
                     videoTrack.enabled = isVideoEnabled;
-                    videoBtn.classList.toggle('active', isVideoEnabled);
+                    cameraBtn.innerHTML = isVideoEnabled ? '<i class="fas fa-video"></i>' : '<i class="fas fa-video-slash"></i>';
                 }
             }
-        }
+        });
 
-        // Leave call
-        function leaveCall() {
+        switchCameraBtn.addEventListener('click', async () => {
+            if (localStream) {
+                const videoTrack = localStream.getVideoTracks()[0];
+                if (videoTrack) {
+                    const constraints = videoTrack.getConstraints();
+                    const newFacingMode = constraints.facingMode === 'user' ? 'environment' : 'user';
+                    
+                    try {
+                        const newStream = await navigator.mediaDevices.getUserMedia({
+                            video: { facingMode: newFacingMode },
+                            audio: false
+                        });
+                        
+                        const newVideoTrack = newStream.getVideoTracks()[0];
+                        localStream.removeTrack(videoTrack);
+                        localStream.addTrack(newVideoTrack);
+                        
+                        // Replace track in peer connection
+                        if (currentCall) {
+                            const sender = currentCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
+                            if (sender) {
+                                sender.replaceTrack(newVideoTrack);
+                            }
+                        }
+                        
+                        localVideo.srcObject = localStream;
+                    } catch (error) {
+                        console.error('Could not switch camera:', error);
+                    }
+                }
+            }
+        });
+
+        endCallBtn.addEventListener('click', () => {
             if (currentCall) {
                 currentCall.close();
+                currentCall = null;
             }
-            
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-            }
-            
-            callScreen.style.display = 'none';
-            setupCard.style.display = 'block';
-            roomCard.style.display = 'none';
-            
-            remoteVideo.srcObject = null;
-            localVideo.srcObject = null;
-        }
+            videoContainer.style.display = 'none';
+            isCallActive = false;
+        });
 
-        // Copy link to clipboard
-        function copyLink() {
-            shareLink.select();
-            document.execCommand('copy');
-            copyLinkBtn.textContent = '✅ Copied!';
+        toggleVideoBtn.addEventListener('click', startVideoCall);
+
+        audioCallBtn.addEventListener('click', async () => {
+            if (!localStream) {
+                await initMedia(false, true);
+            }
+            // Just show video container without video tracks
+            videoContainer.style.display = 'block';
+            isCallActive = true;
+            
+            const call = peer.call(roomId, localStream);
+            handleCall(call);
+        });
+
+        roomInfoBtn.addEventListener('click', () => {
+            const shareUrl = `${window.location.origin}${window.location.pathname}?room=${roomId}`;
+            roomLinkDisplay.textContent = shareUrl;
+            QRCode.toCanvas(qrModalCanvas, shareUrl, { width: 200 });
+            roomModal.classList.add('active');
+        });
+
+        copyRoomLinkBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(roomLinkDisplay.textContent);
+            copyRoomLinkBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
             setTimeout(() => {
-                copyLinkBtn.textContent = '📋 Copy';
+                copyRoomLinkBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Link';
             }, 2000);
+        });
+
+        closeRoomModal.addEventListener('click', () => {
+            roomModal.classList.remove('active');
+        });
+
+        // Toggle local video size
+        localVideo.addEventListener('click', () => {
+            localVideo.classList.toggle('expanded');
+        });
+
+        // Show media fullscreen
+        function showMediaFullscreen(url, type) {
+            mediaModal.classList.add('active');
+            if (type.startsWith('image/') || type === 'gif') {
+                mediaContent.innerHTML = `<img src="${url}" style="max-width: 100%; max-height: 90vh;">`;
+            } else if (type.startsWith('video/')) {
+                mediaContent.innerHTML = `<video src="${url}" controls style="max-width: 100%; max-height: 90vh;"></video>`;
+            }
         }
 
-        // Goto call screen
-        async function gotoCall() {
-            const mediaSuccess = await initMedia();
-            if (!mediaSuccess) return;
-            
-            roomCard.style.display = 'none';
-            callScreen.style.display = 'block';
-            enableControls(true);
+        document.getElementById('closeMediaModal').addEventListener('click', () => {
+            mediaModal.classList.remove('active');
+            mediaContent.innerHTML = '';
+        });
+
+        // Show notification
+        function showNotification(text) {
+            const status = document.createElement('div');
+            status.className = 'message system';
+            status.textContent = text;
+            messagesArea.appendChild(status);
+            setTimeout(() => status.remove(), 3000);
         }
 
-        // Check URL for room parameter on load
+        // Handle enter key
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Check URL for room parameter
         window.addEventListener('load', () => {
             const urlParams = new URLSearchParams(window.location.search);
             const roomParam = urlParams.get('room');
             
             if (roomParam) {
-                roomNameInput.value = roomParam;
-                // Auto-join after a short delay
-                setTimeout(() => {
-                    joinRoom();
-                }, 500);
+                roomInput.value = roomParam;
             }
-        });
-
-        // Event listeners
-        createRoomBtn.addEventListener('click', createRoom);
-        joinRoomBtn.addEventListener('click', joinRoom);
-        gotoCallBtn.addEventListener('click', gotoCall);
-        copyLinkBtn.addEventListener('click', copyLink);
-        audioBtn.addEventListener('click', toggleAudio);
-        videoBtn.addEventListener('click', toggleVideo);
-        leaveBtn.addEventListener('click', leaveCall);
-        sendBtn.addEventListener('click', sendMessage);
-        
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
-        });
-
-        chatToggleBtn.addEventListener('click', () => {
-            const chatCard = document.getElementById('chatCard');
-            chatCard.style.display = chatCard.style.display === 'none' ? 'block' : 'none';
         });
     </script>
 </body>
